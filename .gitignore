@@ -243,3 +243,14 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+# D365 specific
+bin/
+resources/
+XppMetadata/
+BPCheck.xml
+BuildModelResult.xml
+BuildProjectResult.err.xml
+BuildProjectResult.xml
+CompileLabels.xml
+*.xref
