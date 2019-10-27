@@ -8,11 +8,6 @@
 /// </summary>
 class AAXPurchLineClose
 {
-    private PurchTable                  PurchTable;
-    //private PurchLine                   PurchLine;
-    private PurchLineRefRecId           PurchLineRefRecId;
-
-
 }
 ]]></Declaration>
 		<Methods>
@@ -35,6 +30,8 @@ class AAXPurchLineClose
         AAXPurchLineOpen        AAXPurchLineOpen;
         FormDataSource          AAXPurchLineOpen_ds;
         AAXPurchLineClose       AAXPurchLineClose       =   AAXPurchLineClose::construct();
+
+        FormRun                 callerForm;
         ;
 
         if (args && args.caller() && args.record())
@@ -46,7 +43,6 @@ class AAXPurchLineClose
                 case tablenum(AAXPurchLineOpen) :
                     AAXPurchLineOpen = args.record();
                     AAXPurchLineOpen_ds = FormDataUtil::getFormDataSource(AAXPurchLineOpen);
-                    //AAXPurchLineOpen_ds = AAXPurchLineOpen.dataSource();
 
                     multiSelectionHelper.createQueryRanges(AAXPurchLineOpen_ds.queryBuildDataSource(), fieldstr(AAXPurchLineOpen, PurchId));
 
@@ -60,7 +56,8 @@ class AAXPurchLineClose
                     break;
             }
 
-            //TODO: add code to refresh calling data source
+            callerForm = args.caller();
+            callerForm.dataSource().research();
         }
     }
 
