@@ -71,6 +71,11 @@
       <Name>AccountsPayable.AAXPOCloseHelper</Name>
       <Link>Menu Extensions\AccountsPayable.AAXPOCloseHelper</Link>
     </Content>
+    <Content Include="AxMenuExtension\ProcurementAndSourcing.AAXPOCloseHelper">
+      <SubType>Content</SubType>
+      <Name>ProcurementAndSourcing.AAXPOCloseHelper</Name>
+      <Link>Menu Extensions\ProcurementAndSourcing.AAXPOCloseHelper</Link>
+    </Content>
     <Content Include="AxMenuItemAction\AAXPurchLineClose">
       <SubType>Content</SubType>
       <Name>AAXPurchLineClose</Name>

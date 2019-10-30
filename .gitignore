@@ -254,3 +254,4 @@ BuildProjectResult.err.xml
 BuildProjectResult.xml
 CompileLabels.xml
 *.xref
+*.$usr

@@ -158,6 +158,8 @@ class AAXPurchLineClose
         }
         _callerPurchLine.write();
 
+        _callerPurchLine.purchTable().updateBackStatus();
+
         this.mcrSalesOrderCancel(mcrSalesOrderCancellation, purchLineLocal.InventRefTransId);
     }
 
