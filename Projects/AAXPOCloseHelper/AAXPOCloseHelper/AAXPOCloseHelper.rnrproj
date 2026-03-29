@@ -56,6 +56,11 @@
       <Name>AAXPurchLineClose</Name>
       <Link>Classes\AAXPurchLineClose</Link>
     </Content>
+    <Content Include="AxClass\PurchLine_AAXPOCloseHelper_Extension">
+      <SubType>Content</SubType>
+      <Name>PurchLine_AAXPOCloseHelper_Extension</Name>
+      <Link>Classes\PurchLine_AAXPOCloseHelper_Extension</Link>
+    </Content>
     <Content Include="AxForm\AAXPurchLineClose">
       <SubType>Content</SubType>
       <Name>AAXPurchLineClose</Name>
@@ -108,5 +113,5 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
-  <Import Project="$(BuildTasksDirectory)\Microsoft.Dynamics.Framework.Tools.BuildTasks.targets" />
+  <Import Project="$(BuildTasksDirectory)\Microsoft.Dynamics.Framework.Tools.BuildTasks.17.0.targets" />
 </Project>

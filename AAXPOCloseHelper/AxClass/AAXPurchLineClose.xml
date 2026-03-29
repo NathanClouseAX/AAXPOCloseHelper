@@ -54,6 +54,7 @@ class AAXPurchLineClose
                         AAXPurchLineOpen = multiSelectionHelper.getNext();
                     }
                     break;
+
             }
 
             callerForm = args.caller();
@@ -72,45 +73,41 @@ class AAXPurchLineClose
     /// <param name = "PurchLine">purchLine buffer to be cancelled</param>
     public void runPurchLine(PurchLine PurchLine)
     {
+        InventQty       diffRemainPurchPhysical;
+        InventQty       diffRemainInventPhysical;
+
         try
         {
             ttsbegin;
 
+            diffRemainPurchPhysical = 0;
+            diffRemainInventPhysical = PurchLine.calcQtyOrdered(diffRemainPurchPhysical);
+
             PurchLine.RemainPurchPhysical  = 0;
-            PurchLine.RemainInventPhysical = 0;
+            PurchLine.RemainInventPhysical = PurchLine.calcQtyOrdered(PurchLine.RemainPurchPhysical);
 
             if (PurchLine.validateWrite() && PurchLine.purchTable().checkUpdate())
             {
-                this.updateRemainPhysical(PurchLine);
-                
-                if (PurchLine.PurchStatus  == PurchStatus::Canceled &&
-                    PurchLine.PurchaseType == PurchaseType::ReturnItem &&
-                    PurchLine.isInterCompanyOrder())
+                InterCompanyUpdateRemPhys::synchronize(
+                        PurchLine,
+                        diffRemainInventPhysical,
+                        diffRemainPurchPhysical);
+
+                PurchLine.write();
+                    
+                if (diffRemainPurchPhysical)
                 {
-                    if (PurchLine.InterCompanyInventTransId)
-                    {
-                        changecompany(PurchLine.purchTable().InterCompanyCompanyId)
-                        {
-                            var interCompanySalesLine = SalesLine::findInventTransId(PurchLine.InterCompanyInventTransId);
-                            var interCompanySalesTable = SalesTable::find(interCompanySalesLine.SalesId);
-    
-                            if (interCompanySalesTable.ReturnStatus == ReturnStatusHeader::Created &&
-                                !interCompanySalesTable.existRegisteredReceivedInvoicedLines())
-                            {
-                                interCompanySalesLine.SalesStatus = SalesStatus::Canceled;
-                                interCompanySalesLine.ReturnStatus = ReturnStatusLine::Canceled;
-                                interCompanySalesLine.doUpdate();
-                            }
-                            
-                            interCompanySalesTable.SalesStatus = SalesTableType::construct(interCompanySalesTable).lowestSalesStatus();
-                            if (interCompanySalesTable.SalesStatus == SalesStatus::Canceled)
-                            {
-                                interCompanySalesTable.ReturnStatus = ReturnStatusHeader::Canceled;
-                                interCompanySalesTable.doUpdate();
-                            }
-                        }
-                    }
+                    SysDictClass  dictClass;
+                    Object        instance;
+
+                    dictClass = new SysDictClass(className2Id('PurchLine'));
+                    instance  = dictClass.makeObject();
+
+                    dictClass.callObject('ITMUpdateShipLine', instance, PurchLine, PurchLine.orig(), true);
+
+                    instance.write();
                 }
+     
             }
 
             ttscommit;
