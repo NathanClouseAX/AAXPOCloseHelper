@@ -4,7 +4,11 @@
 	<SourceCode>
 		<Declaration><![CDATA[
 /// <summary>
-/// Main PurchLine close class
+/// Provides bulk cancellation of remaining physical quantities on open purchase order lines.
+/// Invoked as an action menu item from the AAXPurchLineClose form, supports multi-select
+/// to cancel remainders across many lines in a single operation.
+/// Handles intercompany synchronization, Landed Cost (ITM) ship line updates,
+/// and MCR Call Center order cancellation workflows.
 /// </summary>
 class AAXPurchLineClose
 {
@@ -14,6 +18,10 @@ class AAXPurchLineClose
 			<Method>
 				<Name>construct</Name>
 				<Source><![CDATA[
+    /// <summary>
+    /// Constructs a new instance of the <c>AAXPurchLineClose</c> class.
+    /// </summary>
+    /// <returns>A new <c>AAXPurchLineClose</c> instance.</returns>
     public static AAXPurchLineClose construct()
     {
         return new AAXPurchLineClose();
@@ -24,6 +32,13 @@ class AAXPurchLineClose
 			<Method>
 				<Name>main</Name>
 				<Source><![CDATA[
+    /// <summary>
+    /// Entry point invoked by the AAXPurchLineClose action menu item.
+    /// Iterates over all selected records in the AAXPurchLineOpen form datasource
+    /// and cancels the remaining physical quantity on each corresponding PurchLine.
+    /// Refreshes the calling form after processing.
+    /// </summary>
+    /// <param name = "args">Framework arguments containing the caller form and selected records.</param>
     public static void main(Args args)
     {
         MultiSelectionHelper    multiSelectionHelper;
@@ -68,9 +83,14 @@ class AAXPurchLineClose
 				<Name>runPurchLine</Name>
 				<Source><![CDATA[
     /// <summary>
-    /// cancels remainder for the given purchLine buffer, pulled from PurchUpdateRemain form
+    /// Cancels the remaining physical quantity on a single purchase order line.
+    /// Sets RemainPurchPhysical to zero, recalculates RemainInventPhysical,
+    /// synchronizes intercompany remaining quantities, writes the updated line,
+    /// and conditionally triggers a Landed Cost (ITM) ship line update via reflection.
+    /// Each line is processed in its own transaction; errors are caught and logged
+    /// as warnings so that other selected lines continue processing.
     /// </summary>
-    /// <param name = "PurchLine">purchLine buffer to be cancelled</param>
+    /// <param name = "PurchLine">The PurchLine buffer to cancel, selected for update.</param>
     public void runPurchLine(PurchLine PurchLine)
     {
         InventQty       diffRemainPurchPhysical;
@@ -124,9 +144,13 @@ class AAXPurchLineClose
 				<Name>updateRemainPhysical</Name>
 				<Source><![CDATA[
     /// <summary>
-    /// update remain physical, sync intercompany and MCR
+    /// Updates the remaining physical quantity on a purchase line with full intercompany
+    /// and MCR Call Center cancellation support. Synchronizes intercompany remaining
+    /// quantities, handles drop-shipment scenarios by zeroing all remaining fields,
+    /// writes the line, updates the purchase order back-order status, and processes
+    /// MCR sales order cancellations and payment adjustments.
     /// </summary>
-    /// <param name = "_callerPurchLine">purchLine buffer to be updated</param>
+    /// <param name = "_callerPurchLine">The PurchLine buffer to be updated with zeroed remaining quantities.</param>
     protected void updateRemainPhysical(PurchLine _callerPurchLine)
     {
         PurchLine       purchLineLocal = PurchLine::findRecId(_callerPurchLine.RecId);
@@ -165,6 +189,14 @@ class AAXPurchLineClose
 			<Method>
 				<Name>mcrSalesOrderCancelInit</Name>
 				<Source><![CDATA[
+    /// <summary>
+    /// Initializes the MCR Call Center sales order cancellation process.
+    /// If the MCR Call Center configuration key is enabled and the purchase line
+    /// is linked to a sales line, creates an MCRSalesOrderCancellation instance
+    /// and captures the pre-cancellation state of the sales order.
+    /// </summary>
+    /// <param name = "_purchLineRefTransId">The inventory transaction ID linking the purchase line to a sales line.</param>
+    /// <returns>An initialized <c>MCRSalesOrderCancellation</c> object, or null if MCR is disabled or no linked sales line exists.</returns>
     private MCRSalesOrderCancellation mcrSalesOrderCancelInit(TradeInventTransId _purchLineRefTransId)
     {
         MCRSalesOrderCancellation MCRSalesOrderCancellation;
@@ -187,10 +219,14 @@ class AAXPurchLineClose
 				<Name>mcrSalesOrderCancel</Name>
 				<Source><![CDATA[
     /// <summary>
-    /// Post the call center order cancellation.
+    /// Completes the MCR Call Center sales order cancellation workflow after a purchase
+    /// line remainder has been cancelled. If the linked sales line status has become Canceled,
+    /// posts the line-level cancellation. If the entire sales order is also Canceled,
+    /// posts the order-level cancellation. Always posts the cancellation payment adjustment
+    /// to handle any payment holds or refunds on the sales order.
     /// </summary>
-    /// <param name = "_mcrSalesOrderCancellation">The call center order cancellation record.</param>
-    /// <param name = "_purchLineRefTransId">The linked purchase line.</param>
+    /// <param name = "_mcrSalesOrderCancellation">The MCR cancellation object initialized via <c>mcrSalesOrderCancelInit</c>.</param>
+    /// <param name = "_purchLineRefTransId">The inventory transaction ID linking to the sales line.</param>
     private void mcrSalesOrderCancel(MCRSalesOrderCancellation _mcrSalesOrderCancellation, TradeInventTransId _purchLineRefTransId)
     {
         if (isConfigurationkeyEnabled(configurationKeyNum(MCRCallCenter)))

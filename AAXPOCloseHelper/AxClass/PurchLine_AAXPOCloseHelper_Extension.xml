@@ -3,6 +3,11 @@
 	<Name>PurchLine_AAXPOCloseHelper_Extension</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
+/// <summary>
+/// Extension of the PurchLine table for the AAXPOCloseHelper model.
+/// Provides a stub method for Landed Cost (ITM) ship line update integration
+/// that can be enabled when the ITM module is present.
+/// </summary>
 [ExtensionOf(tableStr(PurchLine))]
 final class PurchLine_AAXPOCloseHelper_Extension
 {
@@ -12,6 +17,15 @@ final class PurchLine_AAXPOCloseHelper_Extension
 			<Method>
 				<Name>AAXUpdateShipLine</Name>
 				<Source><![CDATA[
+    /// <summary>
+    /// Placeholder for Landed Cost (ITM) ship line synchronization.
+    /// When the ITM module is installed, uncomment the inner call to
+    /// <c>PurchLine::ITMUpdateShipLine</c> to synchronize ship line
+    /// quantities when purchase line remainders are cancelled.
+    /// </summary>
+    /// <param name = "purchLine">The updated PurchLine buffer with modified remaining quantities.</param>
+    /// <param name = "purchLine_Orig">The original PurchLine buffer before modification.</param>
+    /// <param name = "_force">If true, forces the ship line update regardless of change detection.</param>
     static void AAXUpdateShipLine(
         PurchLine purchLine,
         PurchLine purchLine_Orig,

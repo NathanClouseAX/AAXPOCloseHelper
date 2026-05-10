@@ -3,6 +3,13 @@
 	<Name>AAXPurchLineOpen</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
+/// <summary>
+/// Database view that surfaces open (backorder) purchase lines with their associated
+/// purchase order header data. Filtered to PurchStatus = Backorder.
+/// Provides computed columns for expected delivery date and display methods
+/// for item name and catch weight unit. Used as the data source for the
+/// AAXPurchLineClose bulk cancellation form.
+/// </summary>
 public class AAXPurchLineOpen extends common
 {
 }

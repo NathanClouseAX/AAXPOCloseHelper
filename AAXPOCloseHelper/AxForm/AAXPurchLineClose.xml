@@ -6,6 +6,12 @@
 			<Method>
 				<Name>classDeclaration</Name>
 				<Source><![CDATA[
+/// <summary>
+/// Simple List form that displays open (backorder) purchase lines with non-zero remaining
+/// physical quantities. Provides date range filters and a Cancel Remainder action for
+/// bulk cancellation. Uses the AAXPurchLineOpen view as its primary data source.
+/// Default date filter shows lines with expected dates up to 3 months before today.
+/// </summary>
 [Form]
 public class AAXPurchLineClose extends FormRun
 {
@@ -22,6 +28,13 @@ public class AAXPurchLineClose extends FormRun
 			<Method>
 				<Name>updateDesign</Name>
 				<Source><![CDATA[
+    /// <summary>
+    /// Configures the inventory dimension grid display controls based on the
+    /// specified update mode. On initialization, sets up the
+    /// <c>InventDimCtrl_Frm_ActiveRightClick</c> controller with default
+    /// dimension visibility from inventory transaction parameters.
+    /// </summary>
+    /// <param name = "_mode">The inventory dimension form design update mode.</param>
     void updateDesign(InventDimFormDesignUpdate _mode)
     {
         InventDimParm   inventDimParm;
@@ -47,7 +60,7 @@ public class AAXPurchLineClose extends FormRun
 				<Name>init</Name>
 				<Source><![CDATA[
     /// <summary>
-    ///
+    /// Initializes the form and sets up the inventory dimension display controls.
     /// </summary>
     public void init()
     {
@@ -61,6 +74,12 @@ public class AAXPurchLineClose extends FormRun
 			<Method>
 				<Name>inventDimSetupObject</Name>
 				<Source><![CDATA[
+    /// <summary>
+    /// Returns the inventory dimension form setup controller object.
+    /// Required by the D365FO inventory dimension framework for
+    /// coordinating dimension display across the form.
+    /// </summary>
+    /// <returns>The <c>InventDimCtrl_Frm_ActiveRightClick</c> controller instance.</returns>
     Object inventDimSetupObject()
     {
         return inventDimFormSetup;
@@ -77,8 +96,12 @@ public class AAXPurchLineClose extends FormRun
 						<Name>findOrCreateDateAndOrderTypeRanges</Name>
 						<Source><![CDATA[
         /// <summary>
-        ///
+        /// Creates or updates hidden query ranges on the AAXPurchLineOpen data source
+        /// for the expected date range (fromDate to toDate) and remaining physical quantity
+        /// (non-zero only). Clears and recreates ranges if they do not already exist.
+        /// Both ranges are hidden from the user to prevent manual modification.
         /// </summary>
+        /// <param name = "_qbds">The query build data source to apply ranges to.</param>
         private void findOrCreateDateAndOrderTypeRanges(QueryBuildDataSource _qbds)
         {
             const int expectedDateFieldNum        = fieldNum(AAXPurchLineOpen, ExpectedDate);
@@ -106,6 +129,11 @@ public class AAXPurchLineClose extends FormRun
 					<Method>
 						<Name>init</Name>
 						<Source><![CDATA[
+        /// <summary>
+        /// Initializes the AAXPurchLineOpen data source. Sets default values for
+        /// the from/to date filter controls and applies the initial hidden query
+        /// ranges for expected date and non-zero remaining quantity.
+        /// </summary>
         public void init()
         {
             super();
@@ -121,6 +149,12 @@ public class AAXPurchLineClose extends FormRun
 					<Method>
 						<Name>research</Name>
 						<Source><![CDATA[
+        /// <summary>
+        /// Re-applies the date and remaining quantity filter ranges on the runtime
+        /// query before executing the research. Ensures filters reflect the current
+        /// fromDate and toDate values after user changes.
+        /// </summary>
+        /// <param name = "_retainPosition">If true, retains the current cursor position in the grid after refreshing.</param>
         public void research(boolean _retainPosition = false)
         {
             this.findOrCreateDateAndOrderTypeRanges(this.queryRunQueryBuildDataSource());
@@ -141,6 +175,11 @@ public class AAXPurchLineClose extends FormRun
 					<Method>
 						<Name>selectionChange</Name>
 						<Source><![CDATA[
+        /// <summary>
+        /// Handles selection change on the OrderType combo box.
+        /// Updates the delivery type filter value and refreshes the data source query.
+        /// </summary>
+        /// <returns>The result of the super() call.</returns>
         int  selectionChange()
         {
             orderTypeListPage = this.selection();
@@ -159,6 +198,11 @@ public class AAXPurchLineClose extends FormRun
 					<Method>
 						<Name>modified</Name>
 						<Source><![CDATA[
+        /// <summary>
+        /// Handles modification of the From Date filter control.
+        /// Updates the fromDate variable and refreshes the data source query.
+        /// </summary>
+        /// <returns>The result of the super() call.</returns>
         public boolean modified()
         {
             fromDate = this.dateValue();
@@ -177,6 +221,11 @@ public class AAXPurchLineClose extends FormRun
 					<Method>
 						<Name>modified</Name>
 						<Source><![CDATA[
+        /// <summary>
+        /// Handles modification of the To Date filter control.
+        /// Updates the toDate variable and refreshes the data source query.
+        /// </summary>
+        /// <returns>The result of the super() call.</returns>
         public boolean modified()
         {
             toDate = this.dateValue();

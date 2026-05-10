@@ -7,6 +7,12 @@
 			<Method>
 				<Name>classDeclaration</Name>
 				<Source><![CDATA[
+/// <summary>
+/// Query definition backing the AAXPurchLineOpen view.
+/// Selects from PurchLine (filtered to PurchStatus = Backorder) joined
+/// to PurchTable on PurchId. Exposes fields from both tables to support
+/// filtering, display, and lookup in the AAXPurchLineClose form.
+/// </summary>
 [Query]
 public class AAXPurchLineOpen extends QueryRun
 {
